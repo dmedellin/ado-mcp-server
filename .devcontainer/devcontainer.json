@@ -1,0 +1,24 @@
+{
+	"name": "ADO MCP Server Dev Container",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:0-18",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"workbench.colorCustomizations": {
+					"titleBar.activeBackground": "#002244",
+					"titleBar.activeForeground": "#FFFFFF",
+					"activityBar.background": "#002244",
+					"activityBar.foreground": "#FFFFFF",
+					"statusBar.background": "#002244",
+					"statusBar.foreground": "#FFFFFF"
+				}
+			},
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode"
+			]
+		}
+	},
+	"forwardPorts": [3000],
+	"postCreateCommand": "npm install"
+}

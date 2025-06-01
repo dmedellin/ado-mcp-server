@@ -1,0 +1,21 @@
+{
+  "name": "ado-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Azure DevOps",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "azure-devops"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.0.0"
+  }
+}
