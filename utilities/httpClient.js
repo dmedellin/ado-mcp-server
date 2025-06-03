@@ -62,13 +62,30 @@ async function makeApiRequest({
     );
   }
 
-  // Handle cases where response might be empty (e.g., 204 No Content)
+  const headerWhitelist = ["x-ms-continuationtoken"];
+  const responseHeaders = {};
+  response.headers.forEach((value, name) => {
+    if (headerWhitelist.includes(name.toLowerCase())) {
+      responseHeaders[name] = value;
+    }
+  });
+
   const responseText = await response.text();
-  if (!responseText) {
-    return null;
+  let responseBody = null;
+  if (responseText) {
+    try {
+      responseBody = JSON.parse(responseText);
+    } catch (error) {
+      console.error("Failed to parse response JSON:", error);
+      // Optionally, you could throw the error or return the raw text
+      // For now, keeping responseBody as null if parsing fails
+    }
   }
 
-  return JSON.parse(responseText);
+  return {
+    body: responseBody,
+    headers: responseHeaders,
+  };
 }
 
 export { makeApiRequest };
