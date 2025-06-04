@@ -1,21 +1,27 @@
 import { z } from "zod";
 import { makeApiRequest } from "../utilities/httpClient.js";
 
-const ListProjectsInput = z.object({
+const ListProjectsInput = {
   $skip: z.number().optional(),
   $top: z.number().optional(),
   continuationToken: z.string().optional(),
   getDefaultTeamImageUrl: z.boolean().optional(),
   stateFilter: z.string().optional(),
-});
+};
 
 export function registerProjectTools(server) {
   server.tool(
     "listProjects",
     "Tool to list the projects from an azure devOps Org",
     ListProjectsInput,
-    async ({ $skip, $top, continuationToken, getDefaultTeamImageUrl, stateFilter }) => {
-      let projectEndpoint = "projects?api-version=7.2";
+    async ({
+      $skip,
+      $top,
+      continuationToken,
+      getDefaultTeamImageUrl,
+      stateFilter,
+    }) => {
+      let projectEndpoint = "projects?api-version=7.2-preview";
 
       const queryParams = [];
       if ($skip !== undefined) {
@@ -38,14 +44,13 @@ export function registerProjectTools(server) {
         projectEndpoint += `&${queryParams.join("&")}`;
       }
 
-      const projectsData = await makeApiRequest({
+      const responseData = await makeApiRequest({
         endpoint: projectEndpoint,
         method: "GET",
       });
-
       return {
         type: "text",
-        text: JSON.stringify(projectsData, null, 2),
+        text: JSON.stringify(responseData, null, 2),
       };
     }
   );
