@@ -9,7 +9,8 @@ This project implements an MCP server intended for integration with Azure DevOps
 ## Features
 
 - MCP server implementation using the official SDK
-- Extensible architecture for registering project tools
+- Extensible architecture for registering project and work item tools
+- Full support for Azure DevOps Work Item Tracking (WIT) REST API endpoints (create, get, update, delete, list, query, batch, revisions, comments, attachments, relations)
 - Runs over STDIO for integration with other systems
 
 ## Getting Started
@@ -50,7 +51,7 @@ npx @modelcontextprotocol/inspector
 ## Project Structure
 
 - `index.js` - Entry point; initializes and runs the MCP server.
-- `features/` - Directory for registering project-specific tools.
+- `features/` - Directory for registering project and work item tools.
 
 ## Scripts
 
