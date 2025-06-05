@@ -4,6 +4,7 @@ async function makeApiRequest({
   body = null,
   token = null,
   organization = null,
+  contentType = "application/json"
 }) {
   const finalToken = token && token.trim() !== "" ? token : process.env.ADO_TOKEN;
   if (!finalToken || finalToken.trim() === "") {
@@ -30,13 +31,13 @@ async function makeApiRequest({
     );
   }
 
-  const baseUrl = `https://dev.azure.com/${encodeURIComponent(finalOrg)}/_apis`;
+  const baseUrl = `https://dev.azure.com/${encodeURIComponent(finalOrg)}/`;
   const apiUrl = `${baseUrl}/${
     endpoint.startsWith("/") ? endpoint.substring(1) : endpoint
   }`;
 
   const headers = {
-    "Content-Type": "application/json",
+    "Content-Type": contentType,
   };
 
   if (finalToken) {
