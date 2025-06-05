@@ -5,7 +5,7 @@ async function makeApiRequest({
   token = null,
   organization = null,
 }) {
-  const finalToken = token && token.trim() !== "" ? token : process.env.token;
+  const finalToken = token && token.trim() !== "" ? token : process.env.ADO_TOKEN;
   if (!finalToken || finalToken.trim() === "") {
     console.error(
       "[makeApiRequest] Error: No token provided. " +
@@ -19,7 +19,7 @@ async function makeApiRequest({
   const finalOrg =
     organization && organization.trim() !== ""
       ? organization
-      : process.env.organization;
+      : process.env.ADO_ORGANIZATION;
   if (!finalOrg || finalOrg.trim() === "") {
     console.error(
       "[makeApiRequest] Error: No organization provided. " +

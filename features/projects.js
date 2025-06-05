@@ -49,8 +49,12 @@ export function registerProjectTools(server) {
         method: "GET",
       });
       return {
-        type: "text",
-        text: JSON.stringify(responseData, null, 2),
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(responseData, null, 2),
+          },
+        ],
       };
     }
   );
