@@ -30,6 +30,17 @@ const ListWorkItemsInput = {
   expand: z.string().optional(),
 };
 
+const QueryWorkItemsInput = {
+  project: z.string(),
+  filter: z.object({
+    assignedTo: z.string().nullable().optional(),
+    workItemTypes: z.array(z.string()).optional(),
+    states: z.array(z.string()).optional(),
+    top: z.number().optional(),
+    // Add more filter fields as needed
+  }),
+};
+
 // --- Tool Registration ---
 export function registerWorkItemTools(server) {
   // Create Work Item
@@ -38,7 +49,7 @@ export function registerWorkItemTools(server) {
     "Create a new Azure DevOps work item.",
     CreateWorkItemInput,
     async ({ project, type, fields }) => {
-      const endpoint = `${project}/_apis/wit/workitems/$${type}?api-version=7.2-preview.3`;
+      const endpoint = `${project}/_apis/wit/workitems/$${type}?api-version=7.2-preview`;
       const ops = Object.entries(fields).map(([key, value]) => ({
         op: "add",
         path: `/fields/${key}`,
@@ -49,7 +60,14 @@ export function registerWorkItemTools(server) {
         method: "POST",
         body: ops,
       });
-      return { type: "text", text: JSON.stringify(response, null, 2) };
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
     }
   );
 
@@ -59,10 +77,17 @@ export function registerWorkItemTools(server) {
     "Get a work item by ID.",
     GetWorkItemInput,
     async ({ id, expand }) => {
-      let endpoint = `wit/workitems/${id}?api-version=7.2-preview.3`;
+      let endpoint = `wit/workitems/${id}?api-version=7.2-preview`;
       if (expand) endpoint += `&$expand=${expand}`;
       const response = await makeApiRequest({ endpoint, method: "GET" });
-      return { type: "text", text: JSON.stringify(response, null, 2) };
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
     }
   );
 
@@ -72,7 +97,7 @@ export function registerWorkItemTools(server) {
     "Update fields on a work item.",
     UpdateWorkItemInput,
     async ({ id, fields, revision }) => {
-      let endpoint = `wit/workitems/${id}?api-version=7.2-preview.3`;
+      let endpoint = `wit/workitems/${id}?api-version=7.2-preview`;
       if (revision) endpoint += `&revision=${revision}`;
       const ops = Object.entries(fields).map(([key, value]) => ({
         op: "add",
@@ -84,7 +109,14 @@ export function registerWorkItemTools(server) {
         method: "PATCH",
         body: ops,
       });
-      return { type: "text", text: JSON.stringify(response, null, 2) };
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
     }
   );
 
@@ -94,9 +126,16 @@ export function registerWorkItemTools(server) {
     "Delete a work item by ID.",
     DeleteWorkItemInput,
     async ({ id }) => {
-      const endpoint = `wit/workitems/${id}?api-version=7.2-preview.3`;
+      const endpoint = `wit/workitems/${id}?api-version=7.2-preview`;
       const response = await makeApiRequest({ endpoint, method: "DELETE" });
-      return { type: "text", text: JSON.stringify(response, null, 2) };
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
     }
   );
 
@@ -106,7 +145,7 @@ export function registerWorkItemTools(server) {
     "Get multiple work items by IDs.",
     ListWorkItemsInput,
     async ({ ids, fields, asOf, expand }) => {
-      let endpoint = `wit/workitemsbatch?api-version=7.2-preview.3`;
+      let endpoint = `wit/workitemsbatch?api-version=7.2-preview`;
       const body = {
         ids,
         fields,
@@ -118,7 +157,64 @@ export function registerWorkItemTools(server) {
         method: "POST",
         body,
       });
-      return { type: "text", text: JSON.stringify(response, null, 2) };
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // Query Work Items by filter
+  server.tool(
+    "queryWorkItems",
+    "Query work items in a project using filter criteria (e.g., assignedTo, workItemTypes, states).",
+    QueryWorkItemsInput,
+    async ({ project, filter }) => {
+      // Build WIQL query
+      let whereClauses = [
+        `[System.TeamProject] = '${project}'`,
+        `[System.ChangedDate] > @today - 180`,
+        `[System.WorkItemType] <> ''`,
+        `[System.State] <> ''`
+      ];
+      if (filter.assignedTo === null || filter.assignedTo === "") {
+        whereClauses.push("[System.AssignedTo] = ''");
+      } else if (filter.assignedTo) {
+        whereClauses.push(`[System.AssignedTo] = '${filter.assignedTo}'`);
+      }
+      if (filter.workItemTypes && filter.workItemTypes.length > 0) {
+        const types = filter.workItemTypes.map(t => `'${t}'`).join(", ");
+        whereClauses.push(`[System.WorkItemType] IN (${types})`);
+      }
+      if (filter.states && filter.states.length > 0) {
+        const states = filter.states.map(s => `'${s}'`).join(", ");
+        whereClauses.push(`[System.State] IN (${states})`);
+      }
+      const where = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+      const top = filter.top || 100;
+      const wiql = {
+        query: `SELECT [System.Id],[System.WorkItemType],[System.Title],[System.AssignedTo],[System.State],[System.Tags] FROM WorkItems ${where}`
+      };
+      // Use the correct endpoint for WIQL queries (no leading slash, no project name)
+      const endpoint = `wit/wiql?api-version=7.2-preview.2`;
+      const response = await makeApiRequest({
+        endpoint,
+        method: "POST",
+        body: wiql,
+      });
+      // Optionally, fetch work item details if needed
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
     }
   );
 
