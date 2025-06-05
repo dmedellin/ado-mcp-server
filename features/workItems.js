@@ -59,6 +59,7 @@ export function registerWorkItemTools(server) {
         endpoint,
         method: "POST",
         body: ops,
+        contentType: "application/json-patch+json",
       });
       return {
         content: [
@@ -77,7 +78,7 @@ export function registerWorkItemTools(server) {
     "Get a work item by ID.",
     GetWorkItemInput,
     async ({ id, expand }) => {
-      let endpoint = `wit/workitems/${id}?api-version=7.2-preview`;
+      let endpoint = `_apis/wit/workitems/${id}?api-version=7.2-preview`;
       if (expand) endpoint += `&$expand=${expand}`;
       const response = await makeApiRequest({ endpoint, method: "GET" });
       return {
@@ -97,7 +98,7 @@ export function registerWorkItemTools(server) {
     "Update fields on a work item.",
     UpdateWorkItemInput,
     async ({ id, fields, revision }) => {
-      let endpoint = `wit/workitems/${id}?api-version=7.2-preview`;
+      let endpoint = `_apis/wit/workitems/${id}?api-version=7.2-preview`;
       if (revision) endpoint += `&revision=${revision}`;
       const ops = Object.entries(fields).map(([key, value]) => ({
         op: "add",
@@ -126,7 +127,7 @@ export function registerWorkItemTools(server) {
     "Delete a work item by ID.",
     DeleteWorkItemInput,
     async ({ id }) => {
-      const endpoint = `wit/workitems/${id}?api-version=7.2-preview`;
+      const endpoint = `_apis/wit/workitems/${id}?api-version=7.2-preview`;
       const response = await makeApiRequest({ endpoint, method: "DELETE" });
       return {
         content: [
@@ -145,7 +146,7 @@ export function registerWorkItemTools(server) {
     "Get multiple work items by IDs.",
     ListWorkItemsInput,
     async ({ ids, fields, asOf, expand }) => {
-      let endpoint = `wit/workitemsbatch?api-version=7.2-preview`;
+      let endpoint = `_apis/wit/workitemsbatch?api-version=7.2-preview`;
       const body = {
         ids,
         fields,
@@ -179,7 +180,7 @@ export function registerWorkItemTools(server) {
         `[System.TeamProject] = '${project}'`,
         `[System.ChangedDate] > @today - 180`,
         `[System.WorkItemType] <> ''`,
-        `[System.State] <> ''`
+        `[System.State] <> ''`,
       ];
       if (filter.assignedTo === null || filter.assignedTo === "") {
         whereClauses.push("[System.AssignedTo] = ''");
@@ -187,20 +188,21 @@ export function registerWorkItemTools(server) {
         whereClauses.push(`[System.AssignedTo] = '${filter.assignedTo}'`);
       }
       if (filter.workItemTypes && filter.workItemTypes.length > 0) {
-        const types = filter.workItemTypes.map(t => `'${t}'`).join(", ");
+        const types = filter.workItemTypes.map((t) => `'${t}'`).join(", ");
         whereClauses.push(`[System.WorkItemType] IN (${types})`);
       }
       if (filter.states && filter.states.length > 0) {
-        const states = filter.states.map(s => `'${s}'`).join(", ");
+        const states = filter.states.map((s) => `'${s}'`).join(", ");
         whereClauses.push(`[System.State] IN (${states})`);
       }
-      const where = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+      const where =
+        whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
       const top = filter.top || 100;
       const wiql = {
-        query: `SELECT [System.Id],[System.WorkItemType],[System.Title],[System.AssignedTo],[System.State],[System.Tags] FROM WorkItems ${where}`
+        query: `SELECT [System.Id],[System.WorkItemType],[System.Title],[System.AssignedTo],[System.State],[System.Tags] FROM WorkItems ${where}`,
       };
       // Use the correct endpoint for WIQL queries (no leading slash, no project name)
-      const endpoint = `wit/wiql?api-version=7.2-preview.2`;
+      const endpoint = `_apis/wit/wiql?api-version=7.2-preview.2`;
       const response = await makeApiRequest({
         endpoint,
         method: "POST",

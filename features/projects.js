@@ -21,7 +21,7 @@ export function registerProjectTools(server) {
       getDefaultTeamImageUrl,
       stateFilter,
     }) => {
-      let projectEndpoint = "projects?api-version=7.2-preview";
+      let projectEndpoint = "_apis/projects?api-version=7.2-preview";
 
       const queryParams = [];
       if ($skip !== undefined) {
