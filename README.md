@@ -1,3 +1,4 @@
+<!-- filepath: /workspaces/ado-mcp-server/README.md -->
 # ado-mcp-server
 
 A Model Context Protocol (MCP) server for Azure DevOps.
@@ -59,7 +60,6 @@ npx @modelcontextprotocol/inspector
 - `npm test` - (Currently not implemented.)
 
 ## Configuration
-
 No additional configuration is required for basic usage. You may extend functionality by adding new tools in the `features` directory.
 
 ## Dependencies
@@ -83,6 +83,21 @@ ISC
     - `targetId` (number/string): The ID of the target work item (e.g., the parent in a parent-child link).
     - `linkType` (string, optional): The type of link (default: `System.LinkTypes.Hierarchy-Forward` for parent-child).
     - `comment` (string, optional): Optional comment for the link operation.
+  - **Permissions:** Requires permission to edit work items in the Azure DevOps project.
+  - **Example:**
+    ```json
+    {
+      "sourceId": 123,
+      "targetId": 456,
+      "linkType": "System.LinkTypes.Hierarchy-Forward"
+    }
+    ```
+
+- `unlinkWorkItems` — Remove a link (e.g., parent-child, related) between two Azure DevOps work items.
+  - **Input:**
+    - `sourceId` (number/string): The ID of the source work item (the one holding the link).
+    - `targetId` (number/string): The ID of the target work item (the one being linked to).
+    - `linkType` (string, optional): The type of link to remove (default: `System.LinkTypes.Hierarchy-Forward` for parent-child).
   - **Permissions:** Requires permission to edit work items in the Azure DevOps project.
   - **Example:**
     ```json
