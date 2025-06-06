@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest } from "../utilities/httpClient.js";
+import { adoProxy } from "../utilities/adoProxy.js";
 
 const ListProjectsInput = {
   $skip: z.number().optional(),
@@ -21,7 +21,7 @@ export function registerProjectTools(server) {
       getDefaultTeamImageUrl,
       stateFilter,
     }) => {
-      let projectEndpoint = "projects?api-version=7.2-preview";
+      let projectEndpoint = "_apis/projects?api-version=7.2-preview";
 
       const queryParams = [];
       if ($skip !== undefined) {
@@ -44,13 +44,17 @@ export function registerProjectTools(server) {
         projectEndpoint += `&${queryParams.join("&")}`;
       }
 
-      const responseData = await makeApiRequest({
+      const responseData = await adoProxy({
         endpoint: projectEndpoint,
         method: "GET",
       });
       return {
-        type: "text",
-        text: JSON.stringify(responseData, null, 2),
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(responseData, null, 2),
+          },
+        ],
       };
     }
   );

@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "ado": {
+      "command": "node",
+      "args": ["/workspaces/ado-mcp-server/index.js"],
+      "env": {
+        "ADO_ORGANIZATION": "",
+        "ADO_TOKEN": ""
+      }
+    }
+  },
+  "inputs": []
+}
