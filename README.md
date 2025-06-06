@@ -74,3 +74,23 @@ ISC
 ---
 
 *This project is not affiliated with Microsoft or Azure DevOps.*
+
+## Tools
+
+- `linkWorkItems` — Link two Azure DevOps work items (e.g., parent-child, related, etc.).
+  - **Input:**
+    - `sourceId` (number/string): The ID of the source work item (e.g., the child in a parent-child link).
+    - `targetId` (number/string): The ID of the target work item (e.g., the parent in a parent-child link).
+    - `linkType` (string, optional): The type of link (default: `System.LinkTypes.Hierarchy-Forward` for parent-child).
+    - `comment` (string, optional): Optional comment for the link operation.
+  - **Permissions:** Requires permission to edit work items in the Azure DevOps project.
+  - **Example:**
+    ```json
+    {
+      "sourceId": 123,
+      "targetId": 456,
+      "linkType": "System.LinkTypes.Hierarchy-Forward"
+    }
+    ```
+
+- For more link types, see [Azure DevOps documentation](https://learn.microsoft.com/en-us/azure/devops/boards/queries/link-types-work-items?view=azure-devops).

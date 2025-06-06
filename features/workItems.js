@@ -41,6 +41,13 @@ const QueryWorkItemsInput = {
   }),
 };
 
+const LinkWorkItemsInput = {
+  sourceId: z.union([z.string(), z.number()]),
+  targetId: z.union([z.string(), z.number()]),
+  linkType: z.string().default("System.LinkTypes.Hierarchy-Forward"), // Default to parent-child
+  comment: z.string().optional(),
+};
+
 // --- Tool Registration ---
 export function registerWorkItemTools(server) {
   // Create Work Item
@@ -211,6 +218,41 @@ export function registerWorkItemTools(server) {
         project,
       });
       // Optionally, fetch work item details if needed
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // Link Work Items (add relation)
+  server.tool(
+    "linkWorkItems",
+    "Link two Azure DevOps work items (e.g., parent-child, related, etc.).",
+    LinkWorkItemsInput,
+    async ({ sourceId, targetId, linkType, comment }) => {
+      const endpoint = `_apis/wit/workitems/${sourceId}?api-version=7.2-preview`;
+      const ops = [
+        {
+          op: "add",
+          path: "/relations/-",
+          value: {
+            rel: linkType,
+            url: `https://dev.azure.com/${process.env.ADO_ORGANIZATION}/${process.env.ADO_PROJECT}/_apis/wit/workItems/${targetId}`,
+            attributes: comment ? { comment } : undefined,
+          },
+        },
+      ];
+      const response = await adoProxy({
+        endpoint,
+        method: "PATCH",
+        body: ops,
+        contentType: "application/json-patch+json",
+      });
       return {
         content: [
           {
