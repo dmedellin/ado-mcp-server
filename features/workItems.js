@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest } from "../utilities/httpClient.js";
+import { adoProxy } from "../utilities/adoProxy.js";
 
 // --- Input Schemas ---
 const CreateWorkItemInput = {
@@ -49,17 +49,18 @@ export function registerWorkItemTools(server) {
     "Create a new Azure DevOps work item.",
     CreateWorkItemInput,
     async ({ project, type, fields }) => {
-      const endpoint = `${project}/_apis/wit/workitems/$${type}?api-version=7.2-preview`;
+      const endpoint = `_apis/wit/workitems/$${type}?api-version=7.2-preview`;
       const ops = Object.entries(fields).map(([key, value]) => ({
         op: "add",
         path: `/fields/${key}`,
         value,
       }));
-      const response = await makeApiRequest({
+      const response = await adoProxy({
         endpoint,
         method: "POST",
         body: ops,
         contentType: "application/json-patch+json",
+        project,
       });
       return {
         content: [
@@ -80,7 +81,7 @@ export function registerWorkItemTools(server) {
     async ({ id, expand }) => {
       let endpoint = `_apis/wit/workitems/${id}?api-version=7.2-preview`;
       if (expand) endpoint += `&$expand=${expand}`;
-      const response = await makeApiRequest({ endpoint, method: "GET" });
+      const response = await adoProxy({ endpoint, method: "GET" });
       return {
         content: [
           {
@@ -105,7 +106,7 @@ export function registerWorkItemTools(server) {
         path: `/fields/${key}`,
         value,
       }));
-      const response = await makeApiRequest({
+      const response = await adoProxy({
         endpoint,
         method: "PATCH",
         body: ops,
@@ -128,7 +129,7 @@ export function registerWorkItemTools(server) {
     DeleteWorkItemInput,
     async ({ id }) => {
       const endpoint = `_apis/wit/workitems/${id}?api-version=7.2-preview`;
-      const response = await makeApiRequest({ endpoint, method: "DELETE" });
+      const response = await adoProxy({ endpoint, method: "DELETE" });
       return {
         content: [
           {
@@ -153,7 +154,7 @@ export function registerWorkItemTools(server) {
         asOf,
         $expand: expand,
       };
-      const response = await makeApiRequest({
+      const response = await adoProxy({
         endpoint,
         method: "POST",
         body,
@@ -203,10 +204,11 @@ export function registerWorkItemTools(server) {
       };
       // Use the correct endpoint for WIQL queries (no leading slash, no project name)
       const endpoint = `_apis/wit/wiql?api-version=7.2-preview.2`;
-      const response = await makeApiRequest({
+      const response = await adoProxy({
         endpoint,
         method: "POST",
         body: wiql,
+        project,
       });
       // Optionally, fetch work item details if needed
       return {

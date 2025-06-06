@@ -1,19 +1,20 @@
-async function makeApiRequest({
+async function adoProxy({
   endpoint,
   method,
   body = null,
   token = null,
   organization = null,
+  project = null,
   contentType = "application/json"
 }) {
   const finalToken = token && token.trim() !== "" ? token : process.env.ADO_TOKEN;
   if (!finalToken || finalToken.trim() === "") {
     console.error(
-      "[makeApiRequest] Error: No token provided. " +
+      "[adoProxy] Error: No token provided. " +
         "Client payload was empty or missing, and process.env.token is unset."
     );
     throw new Error(
-      "Token is required but was not provided to makeApiRequest."
+      "Token is required but was not provided to adoProxy."
     );
   }
 
@@ -23,16 +24,22 @@ async function makeApiRequest({
       : process.env.ADO_ORGANIZATION;
   if (!finalOrg || finalOrg.trim() === "") {
     console.error(
-      "[makeApiRequest] Error: No organization provided. " +
+      "[adoProxy] Error: No organization provided. " +
         "Client payload was empty or missing, and process.env.organization is unset."
     );
     throw new Error(
-      "Organization is required but was not provided to makeApiRequest."
+      "Organization is required but was not provided to adoProxy."
     );
   }
 
-  const baseUrl = `https://dev.azure.com/${encodeURIComponent(finalOrg)}/`;
-  const apiUrl = `${baseUrl}/${
+  // Compose base URL
+  let baseUrl = `https://dev.azure.com/${encodeURIComponent(finalOrg)}`;
+  if (project && project.trim() !== "") {
+    baseUrl += `/${encodeURIComponent(project)}`;
+  }
+  baseUrl += "/";
+
+  const apiUrl = `${baseUrl}${
     endpoint.startsWith("/") ? endpoint.substring(1) : endpoint
   }`;
 
@@ -89,4 +96,4 @@ async function makeApiRequest({
   };
 }
 
-export { makeApiRequest };
+export { adoProxy };

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makeApiRequest } from "../utilities/httpClient.js";
+import { adoProxy } from "../utilities/adoProxy.js";
 
 const ListProjectsInput = {
   $skip: z.number().optional(),
@@ -44,7 +44,7 @@ export function registerProjectTools(server) {
         projectEndpoint += `&${queryParams.join("&")}`;
       }
 
-      const responseData = await makeApiRequest({
+      const responseData = await adoProxy({
         endpoint: projectEndpoint,
         method: "GET",
       });
