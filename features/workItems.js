@@ -48,6 +48,12 @@ const LinkWorkItemsInput = {
   comment: z.string().optional(),
 };
 
+const UnlinkWorkItemsInput = {
+  sourceId: z.union([z.string(), z.number()]),
+  targetId: z.union([z.string(), z.number()]),
+  linkType: z.string().default("System.LinkTypes.Hierarchy-Forward"), // Default to parent-child
+};
+
 // --- Tool Registration ---
 export function registerWorkItemTools(server) {
   // Create Work Item
@@ -249,6 +255,53 @@ export function registerWorkItemTools(server) {
       ];
       const response = await adoProxy({
         endpoint,
+        method: "PATCH",
+        body: ops,
+        contentType: "application/json-patch+json",
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(response, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // Unlink Work Items (remove relation)
+  server.tool(
+    "unlinkWorkItems",
+    "Remove a link (e.g., parent-child, related) between two Azure DevOps work items.",
+    UnlinkWorkItemsInput,
+    async ({ sourceId, targetId, linkType }) => {
+      // 1. Get the work item with relations expanded
+      const getEndpoint = `_apis/wit/workitems/${sourceId}?$expand=relations&api-version=7.2-preview`;
+      const { body: workItem } = await adoProxy({ endpoint: getEndpoint, method: "GET" });
+      if (!workItem || !workItem.relations) {
+        throw new Error("No relations found on the source work item.");
+      }
+      // 2. Find the relation to remove
+      const relUrlPattern = `/workItems/${targetId}`;
+      const relIndex = workItem.relations.findIndex(
+        (rel) =>
+          rel.rel === linkType &&
+          rel.url && rel.url.endsWith(relUrlPattern)
+      );
+      if (relIndex === -1) {
+        throw new Error(`No relation of type '${linkType}' to work item ${targetId} found on source work item ${sourceId}.`);
+      }
+      // 3. Remove the relation by index
+      const ops = [
+        {
+          op: "remove",
+          path: `/relations/${relIndex}`,
+        },
+      ];
+      const patchEndpoint = `_apis/wit/workitems/${sourceId}?api-version=7.2-preview`;
+      const response = await adoProxy({
+        endpoint: patchEndpoint,
         method: "PATCH",
         body: ops,
         contentType: "application/json-patch+json",
