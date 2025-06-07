@@ -109,3 +109,35 @@ ISC
     ```
 
 - For more link types, see [Azure DevOps documentation](https://learn.microsoft.com/en-us/azure/devops/boards/queries/link-types-work-items?view=azure-devops).
+
+- `listPullRequests` — List Azure DevOps Git pull requests for a repository.
+  - **Input:**
+    - `project` (string): Azure DevOps project name.
+    - `repoId` (string): Repository ID or name.
+    - `status` (string, optional): Filter by status (e.g., 'active').
+    - `creatorId`, `targetRefName`, `sourceRefName` (optional): Additional filters.
+
+- `getPullRequest` — Get details for a specific Azure DevOps Git pull request.
+  - **Input:**
+    - `project` (string)
+    - `repoId` (string)
+    - `pullRequestId` (number/string)
+
+- `createPullRequest` — Create a new Azure DevOps Git pull request.
+  - **Input:**
+    - `project` (string)
+    - `repoId` (string)
+    - `sourceRefName` (string)
+    - `targetRefName` (string)
+    - `title` (string)
+    - `description` (string, optional)
+    - `reviewers` (array, optional)
+
+- `updatePullRequest` — Update an existing Azure DevOps Git pull request.
+  - **Input:**
+    - `project` (string)
+    - `repoId` (string)
+    - `pullRequestId` (number/string)
+    - `title`, `description`, `status` (optional)
+  - **Permissions:** Requires Azure DevOps Personal Access Token (PAT) with code access.
+  - **See:** `features/pullRequests.js` for usage and test prompts.
