@@ -4,8 +4,8 @@
       "command": "node",
       "args": ["/workspaces/ado-mcp-server/index.js"],
       "env": {
-        "ADO_ORGANIZATION": "",
-        "ADO_TOKEN": ""
+        "ADO_ORGANIZATION": "larueda",
+        "ADO_TOKEN": "3ut5TKzYa9YSErEpcuATk476OKhnWFHMkdNDt8r7Ws9528ZpS0k4JQQJ99BFACAAAAAAAAAAAAASAZDO2fr9"
       }
     }
   },

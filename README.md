@@ -108,4 +108,34 @@ ISC
     }
     ```
 
+- `listBranches` — List Git branches (refs) for an Azure DevOps repository.
+  - **Input:**
+    - `project` (string): Azure DevOps project name.
+    - `repoId` (string): Repository ID or name.
+    - `filter` (string, optional): Filter for branch names.
+    - `includeLinks` (boolean, optional): Include reference links.
+    - `latestStatusesOnly` (boolean, optional): Only latest statuses.
+  - **Example:**
+    ```json
+    {
+      "project": "MyProject",
+      "repoId": "MyRepo",
+      "filter": "refs/heads/feature/"
+    }
+    ```
+
+- `cloneRepo` — Clone an Azure DevOps Git repository to the local MCP server filesystem.
+  - **Input:**
+    - `project` (string): Azure DevOps project name.
+    - `repoId` (string): Repository ID or name.
+    - `targetDir` (string, optional): Target directory for the clone (default: temp directory).
+  - **Example:**
+    ```json
+    {
+      "project": "MyProject",
+      "repoId": "MyRepo",
+      "targetDir": "/tmp/myrepo-clone"
+    }
+    ```
+
 - For more link types, see [Azure DevOps documentation](https://learn.microsoft.com/en-us/azure/devops/boards/queries/link-types-work-items?view=azure-devops).
